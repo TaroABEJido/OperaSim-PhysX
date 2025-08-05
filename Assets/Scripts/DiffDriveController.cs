@@ -11,6 +11,14 @@ using Unity.Robotics.Core;
 using System;
 using PID_Controller;
 
+public enum ProjectionMode
+{
+    Radial,         // 原点方向へ等比縮小
+    OmegaPriority,  // 角速度を優先保持
+    LinearPriority  // 並進速度を優先保持
+}
+
+
 /// <summary>
 /// 差動駆動車の制御を行う
 /// </summary>
@@ -18,9 +26,15 @@ public class DiffDriveController : MonoBehaviour
 {
     private ROSConnection ros;
 
+    [Tooltip("VW挙動調整モードを使うか？\n（VW挙動調整モード：cmd_vel (vw入力) が与えられた際，vw組合せ時の出力を制限するモード")]
+    public bool EnableVWBehaviorMode = true;
+
+    [Tooltip("")]
+    public double VWRatioFactor = 1.0;
+
     [Tooltip("左の車輪のgameObjectを登録してください（複数登録可能）")]
     public List<GameObject> leftWheels;
-        
+
     [Tooltip("右の車輪のgameObjectを登録してください（複数登録可能）")]
     public List<GameObject> rightWheels;
 
@@ -118,7 +132,8 @@ public class DiffDriveController : MonoBehaviour
             Debug.Log("Check left!");
 
             /* Get ArticulationBody-type Component named "left_middle_wheel_link" */
-            if(left.name == "left_middle_wheel_link"){
+            if (left.name == "left_middle_wheel_link")
+            {
                 leftMiddleWheel = body;
             }
             leftWheelControllers.Add(new PID(pGain, iGain, dGain, 1, torqueLimit, -torqueLimit));
@@ -130,14 +145,15 @@ public class DiffDriveController : MonoBehaviour
             body.ConfigureVehicleSubsteps(5f, 100, 100);
             rightWheelColliders.Add(body);
             Debug.Log("Check right!");
-            
+
             /* Get ArticulationBody-type Component named "right_middle_wheel_link" */
-            if(right.name == "right_middle_wheel_link"){
+            if (right.name == "right_middle_wheel_link")
+            {
                 rightMiddleWheel = body;
             }
             rightWheelControllers.Add(new PID(pGain, iGain, dGain, 1, torqueLimit, -torqueLimit));
         }
-        tread_half = Mathf.Abs(leftWheels[0].transform.localPosition.x - rightWheels[0].transform.localPosition.x)/2;
+        tread_half = Mathf.Abs(leftWheels[0].transform.localPosition.x - rightWheels[0].transform.localPosition.x) / 2;
 
         preprocessedRobotName = Utils.PreprocessNamespace(this.gameObject, robotName);
         preprocessedChildFrameName = Utils.PreprocessNamespace(this.gameObject, childFrameName);
@@ -177,8 +193,8 @@ public class DiffDriveController : MonoBehaviour
         // Debug.Log("RightJointVelocity:"+rightVelMes);
 
         /* Calculate linear and angular velocity based on kinematics */
-        double linearVel = (rightVelMes + leftVelMes)/2.0;
-        double angularVel = (rightVelMes - leftVelMes)/(2.0*tread_half*treadCollectionFactor);   
+        double linearVel = (rightVelMes + leftVelMes) / 2.0;
+        double angularVel = (rightVelMes - leftVelMes) / (2.0 * tread_half * treadCollectionFactor);
         // Debug.Log("LinearVelocity:"+linearVel);
         // Debug.Log("AngularVelocity:"+angularVel);
         // Debug.Log("tread_half:"+tread_half);
@@ -186,8 +202,9 @@ public class DiffDriveController : MonoBehaviour
 
         yaw += angularVel * deltaTime;
         /* Normalize Yaw [batween -PI and +PI] */
-        if(Mathf.Abs((float)yaw) > Mathf.PI){
-            yaw -= (double)(2*Mathf.PI*Mathf.Sign((float)yaw));
+        if (Mathf.Abs((float)yaw) > Mathf.PI)
+        {
+            yaw -= (double)(2 * Mathf.PI * Mathf.Sign((float)yaw));
         }
 
         odomMessage.pose.pose.position.x += linearVel * (double)Mathf.Cos((float)yaw) * deltaTime;
@@ -197,14 +214,14 @@ public class DiffDriveController : MonoBehaviour
         // Debug.Log("y:"+odomMessage.pose.pose.position.y);
         // Debug.Log("yaw:"+yaw);
 
-        Quaternion rotation = Quaternion.Euler(0, 0, (float)(yaw*180.0/(double)Mathf.PI));
+        Quaternion rotation = Quaternion.Euler(0, 0, (float)(yaw * 180.0 / (double)Mathf.PI));
 
         odomMessage.pose.pose.orientation.w = rotation.w;
         odomMessage.pose.pose.orientation.x = rotation.x;
         odomMessage.pose.pose.orientation.y = rotation.y;
         odomMessage.pose.pose.orientation.z = rotation.z;
 
-        odomMessage.pose.covariance = new double[] {0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0};
+        odomMessage.pose.covariance = new double[] { 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0 };
 
         odomMessage.twist.twist.linear.x = linearVel;
         odomMessage.twist.twist.linear.y = 0.0;
@@ -214,8 +231,8 @@ public class DiffDriveController : MonoBehaviour
         odomMessage.twist.twist.angular.y = 0.0;
         odomMessage.twist.twist.angular.z = angularVel;
 
-        odomMessage.twist.covariance = new double[] {0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0};
-        
+        odomMessage.twist.covariance = new double[] { 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1000.0 };
+
         if (timeElapsed >= publishMessageInterval)
         {
             odomMessage.header.frame_id = preprocessedRobotName + "_tf/odom";
@@ -226,14 +243,16 @@ public class DiffDriveController : MonoBehaviour
             timeElapsed = 0.0f;
         }
 
-        if (emergencyStop && emergencyStop.isEmergencyStop) {
+        if (emergencyStop && emergencyStop.isEmergencyStop)
+        {
             leftVelCmd = 0.0;
             rightVelCmd = 0.0;
         }
 
         /* Set targetVelocity in xDrive in wheels */
         var ts = TimeSpan.FromSeconds(deltaTime);
-        for (var i = 0; i < leftWheelColliders.Count; i++) {
+        for (var i = 0; i < leftWheelColliders.Count; i++)
+        {
             var left = leftWheelColliders[i];
             var pid = leftWheelControllers[i];
             var v = (float)pid.PID_iterate(leftVelCmd, leftVelMes, ts);
@@ -286,28 +305,108 @@ public class DiffDriveController : MonoBehaviour
         // Debug.Log("RightJointVelocityCommand:" + rightVelCmd);
     }
 
+
+    void CommandLinearAngularVelocityVWBehaviorMode(double cmdLinearVel, double cmdAngularVel)
+    {
+        double p = VWRatioFactor;
+        // 1. 可行域判定
+        double g = Math.Pow(
+                    Math.Pow(Math.Abs(cmdLinearVel) / maxLinearVelocity, p) +
+                    Math.Pow(Math.Abs(cmdAngularVel) / maxAngularVelocity, p),
+                    1.0 / p);
+
+        double v_out = cmdLinearVel;
+        double w_out = cmdAngularVel;
+
+        ProjectionMode projMode = ProjectionMode.Radial;
+
+        if (g > 1f)        // ===== 投影が必要 =====
+        {
+            switch (projMode)
+            {
+                // --- 原点に向け等比縮小 (Radial) -----------------
+                case ProjectionMode.Radial:
+                    double s = 1f / g;
+                    v_out *= s;
+                    w_out *= s;
+                    break;
+
+                // --- 角速度優先 (OmegaPriority) -----------------
+                case ProjectionMode.OmegaPriority:
+                    w_out = Math.Clamp(w_out, -maxAngularVelocity, maxAngularVelocity);
+
+                    // (|v|/v_max)^p + (|w|/w_max)^p = 1 から v の許容値を決定
+                    double insideV = Math.Max(
+                            0f,
+                            1f - Math.Pow(Math.Abs(w_out) / maxAngularVelocity, p));
+                    double v_lim = maxLinearVelocity * Math.Pow(insideV, 1f / p);
+                    v_out = Math.Clamp(v_out, -v_lim, v_lim);
+                    break;
+
+                // --- 並進速度優先 (LinearPriority) --------------
+                case ProjectionMode.LinearPriority:
+                    v_out = Math.Clamp(v_out, -maxLinearVelocity, maxLinearVelocity);
+
+                    double insideW = Math.Max(
+                            0f,
+                            1f - Math.Pow(Math.Abs(v_out) / maxLinearVelocity, p));
+                    double w_lim = maxAngularVelocity * Math.Pow(insideW, 1f / p);
+                    w_out = Math.Clamp(w_out, -w_lim, w_lim);
+                    break;
+            }
+        }
+
+        // 2. 左右クローラ速度へ変換 (逆運動学)
+        leftVelCmd = v_out - tread_half * w_out;   // [m/s]
+        rightVelCmd = v_out + tread_half * w_out;   // [m/s]
+        Debug.Log("LeftJointVelocityCommand:" + leftVelCmd);
+        Debug.Log("RightJointVelocityCommand:" + rightVelCmd);
+
+        // --- デバッグ出力（任意） -------------------------------
+        // Debug.Log($"projMode={projMode}  v_in={cmdLinearVel:F2} ω_in={cmdAngularVel:F2} "
+        //         +$"-> v_out={v_out:F2} ω_out={w_out:F2}");
+    }
+
     void ExecuteTwist(TwistMsg twist)
     {
         //Debug.Log("Linear Velocity:"+twist.linear.x);
         //Debug.Log("Angular Velocity:"+twist.angular.z);
-        CommandLinearAngularVelocity(twist.linear.x, twist.angular.z);
+
+        // ここで条件分岐を行い，vw 挙動調整モードを 使うかどうか選択
+        if (EnableVWBehaviorMode == true)
+        {
+            CommandLinearAngularVelocityVWBehaviorMode(twist.linear.x, twist.angular.z);
+        }
+        else
+        {
+            CommandLinearAngularVelocity(twist.linear.x, twist.angular.z);
+        }
     }
 
     void ExecuteJointCmd(JointCmdMsg cmd)
     {
         double linearVelCmd = Double.NaN, angularVelCmd = Double.NaN;
-        for (int i = 0; i < cmd.joint_name.Length; i++) {
-            if (cmd.joint_name[i] == "left_track") {
+        for (int i = 0; i < cmd.joint_name.Length; i++)
+        {
+            if (cmd.joint_name[i] == "left_track")
+            {
                 leftVelCmd = cmd.velocity[i];
-            } else if (cmd.joint_name[i] == "right_track") {
+            }
+            else if (cmd.joint_name[i] == "right_track")
+            {
                 rightVelCmd = cmd.velocity[i];
-            } else if (cmd.joint_name[i] == "forward_volume") {
+            }
+            else if (cmd.joint_name[i] == "forward_volume")
+            {
                 linearVelCmd = cmd.velocity[i];
-            } else if (cmd.joint_name[i] == "turn_volume") {
+            }
+            else if (cmd.joint_name[i] == "turn_volume")
+            {
                 angularVelCmd = cmd.velocity[i];
             }
         }
-        if (!double.IsNaN(linearVelCmd) && !double.IsNaN(angularVelCmd)) {
+        if (!double.IsNaN(linearVelCmd) && !double.IsNaN(angularVelCmd))
+        {
             CommandLinearAngularVelocity(linearVelCmd, angularVelCmd);
         }
     }
