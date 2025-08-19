@@ -44,7 +44,7 @@ public class ExcavatorDiffDriveController : DiffDriveController
     public double rabbitMaxLinearVelocity;
     public double rabbitMaxAngularVelocity;
 
-    void Start()
+    protected override void Start()
     {
         if (EnableSpeedPreset == true)
         {
@@ -56,11 +56,17 @@ public class ExcavatorDiffDriveController : DiffDriveController
                     maxAngularVelocity = turtleMaxAngularVelocity;
                     break;
 
-                case SpeedPreset.rabbit :
-                    maxLinearVelocity  = turtleMaxLinearVelocity;
+                case SpeedPreset.rabbit:
+                    maxLinearVelocity = turtleMaxLinearVelocity;
                     maxAngularVelocity = turtleMaxAngularVelocity;
                     break;
-            } 
+            }
         }
-    }    
+        base.Start();
+    }
+
+    // protected override void FixedUpdate()
+    // {
+    //     base.FixedUpdate();
+    // }        
 }

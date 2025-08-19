@@ -158,7 +158,7 @@ public class Com3FrontController : MonoBehaviour
     void FixedUpdate()
     {
         k_JointAngleBoom_2.Value = joints["arm_joint"].joint.xDrive.target;
-        Debug.Log("arm_joint Angle: " + joints["arm_joint"].joint.xDrive.target);
+        // Debug.Log("arm_joint Angle: " + joints["arm_joint"].joint.xDrive.target);
 
         double data_sample = 0.0f;
 

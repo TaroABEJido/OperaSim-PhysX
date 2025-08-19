@@ -106,7 +106,7 @@ public class DiffDriveController : MonoBehaviour
     private EmergencyStop emergencyStop;
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
         ros = ROSConnection.GetOrCreateInstance();
         emergencyStop = EmergencyStop.GetEmergencyStop(this.gameObject);
@@ -359,8 +359,8 @@ public class DiffDriveController : MonoBehaviour
         // 2. 左右クローラ速度へ変換 (逆運動学)
         leftVelCmd = v_out - tread_half * w_out;   // [m/s]
         rightVelCmd = v_out + tread_half * w_out;   // [m/s]
-        Debug.Log("LeftJointVelocityCommand:" + leftVelCmd);
-        Debug.Log("RightJointVelocityCommand:" + rightVelCmd);
+        Debug.Log("v_out:" + v_out);
+        Debug.Log("w_out:" + w_out);
 
         // --- デバッグ出力（任意） -------------------------------
         // Debug.Log($"projMode={projMode}  v_in={cmdLinearVel:F2} ω_in={cmdAngularVel:F2} "
