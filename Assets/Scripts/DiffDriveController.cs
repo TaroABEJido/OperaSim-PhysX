@@ -14,8 +14,7 @@ using PID_Controller;
 public enum ProjectionMode
 {
     Radial,         // 原点方向へ等比縮小
-    OmegaPriority,  // 角速度を優先保持
-    LinearPriority  // 並進速度を優先保持
+    GradRadial      // 
 }
 
 
@@ -331,28 +330,30 @@ public class DiffDriveController : MonoBehaviour
                     w_out *= s;
                     break;
 
-                // --- 角速度優先 (OmegaPriority) -----------------
-                case ProjectionMode.OmegaPriority:
-                    w_out = Math.Clamp(w_out, -maxAngularVelocity, maxAngularVelocity);
+                case ProjectionMode.Radial:
 
-                    // (|v|/v_max)^p + (|w|/w_max)^p = 1 から v の許容値を決定
-                    double insideV = Math.Max(
-                            0f,
-                            1f - Math.Pow(Math.Abs(w_out) / maxAngularVelocity, p));
-                    double v_lim = maxLinearVelocity * Math.Pow(insideV, 1f / p);
-                    v_out = Math.Clamp(v_out, -v_lim, v_lim);
-                    break;
+                    // // --- 角速度優先 (OmegaPriority) -----------------
+                    // case ProjectionMode.OmegaPriority:
+                    //     w_out = Math.Clamp(w_out, -maxAngularVelocity, maxAngularVelocity);
 
-                // --- 並進速度優先 (LinearPriority) --------------
-                case ProjectionMode.LinearPriority:
-                    v_out = Math.Clamp(v_out, -maxLinearVelocity, maxLinearVelocity);
+                    //     // (|v|/v_max)^p + (|w|/w_max)^p = 1 から v の許容値を決定
+                    //     double insideV = Math.Max(
+                    //             0f,
+                    //             1f - Math.Pow(Math.Abs(w_out) / maxAngularVelocity, p));
+                    //     double v_lim = maxLinearVelocity * Math.Pow(insideV, 1f / p);
+                    //     v_out = Math.Clamp(v_out, -v_lim, v_lim);
+                    //     break;
 
-                    double insideW = Math.Max(
-                            0f,
-                            1f - Math.Pow(Math.Abs(v_out) / maxLinearVelocity, p));
-                    double w_lim = maxAngularVelocity * Math.Pow(insideW, 1f / p);
-                    w_out = Math.Clamp(w_out, -w_lim, w_lim);
-                    break;
+                    // // --- 並進速度優先 (LinearPriority) --------------
+                    // case ProjectionMode.LinearPriority:
+                    //     v_out = Math.Clamp(v_out, -maxLinearVelocity, maxLinearVelocity);
+
+                    //     double insideW = Math.Max(
+                    //             0f,
+                    //             1f - Math.Pow(Math.Abs(v_out) / maxLinearVelocity, p));
+                    //     double w_lim = maxAngularVelocity * Math.Pow(insideW, 1f / p);
+                    //     w_out = Math.Clamp(w_out, -w_lim, w_lim);
+                    //     break;
             }
         }
 
