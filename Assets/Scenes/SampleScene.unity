@@ -13695,6 +13695,10 @@ PrefabInstance:
       value: 0.040186685
       objectReference: {fileID: 0}
     - target: {fileID: 1270733267895949920, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
+      propertyPath: m_ParentAnchorPosition.y
+      value: 0.83668983
+      objectReference: {fileID: 0}
+    - target: {fileID: 1270733267895949920, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
       propertyPath: m_ParentAnchorPosition.z
       value: 0.22766982
       objectReference: {fileID: 0}
@@ -13920,7 +13924,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7044316461159451016, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7044316461159451016, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
       propertyPath: brakeTorque
@@ -13964,7 +13968,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8521069295349280822, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8521069295349280822, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
       propertyPath: brakeTorque
@@ -13975,8 +13979,24 @@ PrefabInstance:
       value: 20000
       objectReference: {fileID: 0}
     - target: {fileID: 8521069295349280822, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
+      propertyPath: VWDecelFactor
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521069295349280822, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
       propertyPath: VWRatioFactor
-      value: 0.25
+      value: 0.99
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521069295349280822, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
+      propertyPath: maxLinearVelocity
+      value: 0.916667
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521069295349280822, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
+      propertyPath: maxAngularVelocity
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521069295349280822, guid: 2dd7b6640a1df7f038639fda1ffd090a, type: 3}
+      propertyPath: EnableVWBehaviorMode
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
